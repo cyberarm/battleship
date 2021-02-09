@@ -14,7 +14,7 @@ module Battleship
             end
           end
 
-          stack(padding: 20, width: 0.29995, height: 1.0) do
+          stack(padding: 20, width: 0.65, height: 1.0) do
             @content = stack(width: 1.0, height: 0.95) do
             end
 

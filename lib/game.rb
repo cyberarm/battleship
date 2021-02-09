@@ -36,8 +36,11 @@ module Battleship
     def update
       super
 
-      cell = @player_board.mouse_over?(window.mouse_x, window.mouse_y)
-      cell.state = :hover if cell
+      unless focused == @command_prompt
+        self.focus = @command_prompt
+        @command_prompt.instance_variable_set(:"@focus", true)
+        window.text_input = @command_prompt.instance_variable_get(:"@text_input")
+      end
     end
 
     def button_down(id)
@@ -52,6 +55,8 @@ module Battleship
             SFX::CMD_RECEIVED.play(1, 1, false)
           end
         end
+      when Gosu::KB_ESCAPE
+        push_state(Menus::Pause)
       end
     end
   end

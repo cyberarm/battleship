@@ -6,12 +6,16 @@ module Battleship
 
         @navigation.clear do
           button "Play", width: 1.0, margin_top: 10 do
+            SFX::CLICK.play
             push_state(Menus::Lobby)
           end
 
-          button "Credits", width: 1.0, margin_top: 10
+          button "Credits", width: 1.0, margin_top: 10 do
+            SFX::CLICK.play
+          end
 
           button "Exit", width: 1.0, margin_top: 10 do
+            SFX::CLICK.play
             window.close
           end
         end

@@ -10,8 +10,12 @@ require_relative "lib/menu"
 require_relative "lib/menus/main_menu"
 require_relative "lib/menus/lobby"
 require_relative "lib/menus/loading"
+require_relative "lib/menus/pause"
 require_relative "lib/game"
 require_relative "lib/grid"
 require_relative "lib/sound_effects"
+require_relative "lib/ship"
+require_relative "lib/command_proxy"
+require_relative "lib/player"
 
 Battleship::Window.new(width: 1280, height: 720).show

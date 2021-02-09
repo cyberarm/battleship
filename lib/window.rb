@@ -48,7 +48,12 @@ module Battleship
     end
 
     def needs_cursor?
-      true
+      true unless current_state.is_a?(Game)
+    end
+
+    def close
+      puts "Shutting down..."
+      close!
     end
   end
 end

@@ -15,6 +15,7 @@ module Battleship
         @navigation.clear do
           button "Cancel", width: 1.0, margin_top: 10 do
             @sfx&.stop
+            SFX::CLICK.play
             pop_state
           end
         end
