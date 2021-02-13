@@ -59,28 +59,36 @@ module Battleship
               end
 
               stack(width: 0.5, height: 1.0) do
-                button "Carrier", width: 1.0, margin_top: 10 do
+                button "Aircraft Carrier", width: 1.0, margin_top: 10 do
                   SFX::CLICK.play
+                  select_ship(:aircraft_carrier)
                 end
 
                 button "Battleship", width: 1.0, margin_top: 10 do
                   SFX::CLICK.play
+                  select_ship(:battleship)
                 end
 
                 button "Cruiser", width: 1.0, margin_top: 10 do
                   SFX::CLICK.play
+                  select_ship(:cruiser)
                 end
 
                 button "Submarine", width: 1.0, margin_top: 10 do
                   SFX::CLICK.play
+                  select_ship(:submarine)
                 end
 
                 button "Patrol Boat", width: 1.0, margin_top: 10 do
                   SFX::CLICK.play
+                  select_ship(:patrol_boat)
                 end
 
                 button "Rotate", width: 1.0, margin_top: 40 do
                   SFX::CLICK.play
+
+                  @ship&.angle += 90
+                  @ship&.angle %= 360
                 end
               end
             end
@@ -89,6 +97,14 @@ module Battleship
           @setup_grid = Grid.new(parent: @setup_grid_container)
           @game_objects << @setup_grid
         end
+      end
+
+      def draw
+        super
+
+        Gosu.flush
+        @ship&.position = CyberarmEngine::Vector.new(window.mouse_x, window.mouse_y)
+        @ship&.draw(@setup_grid.cell_size)
       end
 
       def game_options
@@ -104,6 +120,23 @@ module Battleship
             hosting: @hosting.value
           )
         }
+      end
+
+      def select_ship(ship)
+        @ship = case ship
+        when :aircraft_carrier
+          AircraftCarrier.new
+        when :battleship
+          BattleShip.new
+        when :cruiser
+          Cruiser.new
+        when :submarine
+          Submarine.new
+        when :patrol_boat
+          PatrolBoat.new
+        else
+          puts "Unknown ship: #{ship}"
+        end
       end
     end
   end

@@ -1,7 +1,10 @@
 module Battleship
   class Grid < CyberarmEngine::GameObject
     FONT = Gosu::Font.new(20, name: Battleship::FONT)
+
     class Cell
+      attr_accessor :data
+
       def initialize(state: :none)
         @state = state
 
@@ -9,6 +12,8 @@ module Battleship
         @border_color = 0xff_104010
         @border_size = 2
         @base_color = @color
+
+        @data = nil
       end
 
       def draw(x, y, size)
@@ -34,10 +39,13 @@ module Battleship
       end
     end
 
+    attr_reader :cell_size
+
     def setup
       @parent = @options[:parent]
 
-      @grid = Array.new(10) { Array.new(10) { Cell.new }}
+      @grid = Array.new(10) { Array.new(10) { Cell.new } }
+      @cell_size = 16
     end
 
     def get(x, y)
@@ -51,8 +59,11 @@ module Battleship
       y = (y - @parent.y) / @cell_size - 1
 
       return if x.negative?
+
       x = 10 if x > 10
+
       return if y.negative?
+
       y = 10 if y > 10
 
       get(x, y)
@@ -60,6 +71,7 @@ module Battleship
 
     def draw
       return unless @updated
+
       size = 11 * @cell_size
       x = @parent.x
       y = @parent.y
