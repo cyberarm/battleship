@@ -49,14 +49,38 @@ module Battleship
       case id
       when Gosu::KB_ENTER, Gosu::KB_RETURN
         if @command_prompt && !@command_prompt.value.empty? && @command_prompt.enabled?
-          @command_history.apend do
-            tagline "<b>You:</b> #{@command_prompt.value}", color: Gosu::Color::GREEN
-            @command_prompt.value = ""
-            SFX::CMD_RECEIVED.play(1, 1, false)
-          end
+          handle_command
         end
       when Gosu::KB_ESCAPE
         push_state(Menus::Pause)
+      end
+    end
+
+    def handle_command
+      command = @command_prompt.value.strip.upcase
+
+      if (valid = command.length.between?(2, 3))
+        letter = command[0]
+        number = command[1]
+        number = command[1..2] if command.length == 3
+        number = number.to_i - 1 # subtract one to get the array index
+
+        if Array("A".."J").include?(letter) && number.between?(0, 9)
+          x = number
+          y = Array("A".."J").index(letter)
+
+          @command_history.apend do
+            tagline "<b>You:</b> #{@command_prompt.value}", color: Gosu::Color::GREEN
+            @command_prompt.value = ""
+            cell = @attack_board.get(x, y)
+            cell.state = rand < 0.5 ? :hit : :miss
+            SFX::CMD_RECEIVED.play(1, 1, false)
+          end
+        else
+          SFX::HIT.play
+        end
+      else
+        SFX::HIT.play
       end
     end
   end

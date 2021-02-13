@@ -22,6 +22,12 @@ module Battleship
           @color = @base_color
         when :hover
           @color = Gosu::Color::BLACK
+        when :hit
+          @color = Gosu::Color.rgb(200, 0, 0)
+        when :miss
+          @color = Gosu::Color::WHITE
+        when :kill
+          @color = Gosu::Color::RED
         else
           raise
         end
@@ -85,10 +91,6 @@ module Battleship
       @cell_size = @max_size / 11.0
 
       @updated = true
-
-      @grid.flatten.each do |cell|
-        cell.state = :none
-      end
     end
   end
 end
