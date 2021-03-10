@@ -6,8 +6,12 @@ module Battleship
 
         @navigation.clear do
           button "Start", width: 1.0, margin_top: 10 do
-            SFX::CLICK.play
-            push_state(Menus::Loading, game_options: game_options)
+            if valid_grid_setup?
+              SFX::CLICK.play
+              push_state(Menus::Loading, game_options: game_options)
+            else
+              SFX::HIT.play
+            end
           end
 
           button "Back", width: 1.0, margin_top: 10 do
@@ -103,7 +107,15 @@ module Battleship
         super
 
         Gosu.flush
-        @ship&.position = CyberarmEngine::Vector.new(window.mouse_x, window.mouse_y)
+
+        @setup_grid.cells.each do |cell|
+          if cell.data.is_a?(Ship)
+            ship = cell.data
+            ship.draw(@setup_grid.cell_size)
+          end
+        end
+
+        @ship&.position = CyberarmEngine::Vector.new(window.mouse_x - @ship.width / 2, window.mouse_y - @ship.height / 2)
         @ship&.draw(@setup_grid.cell_size)
       end
 
@@ -122,20 +134,112 @@ module Battleship
         }
       end
 
+      def update
+        super
+
+        @setup_grid.cells.each { |c| c.state = :none }
+
+        ship_grid_cells do |cells|
+          # Check number of cells and for existing ships
+          if cells.size != @ship.length || cells.find { |c| c.data != nil }
+            cells.each { |c| c.state = :error }
+          else
+            cells.each { |c| c.state = :hover }
+          end
+        end
+      end
+
       def select_ship(ship)
         @ship = case ship
         when :aircraft_carrier
-          AircraftCarrier.new
+          @aircraft_carrier ||= AircraftCarrier.new(color: 0xaa_00ff00)
         when :battleship
-          BattleShip.new
+          @battleship ||= BattleShip.new(color: 0xaa_00ff00)
         when :cruiser
-          Cruiser.new
+          @cruiser ||= Cruiser.new(color: 0xaa_00ff00)
         when :submarine
-          Submarine.new
+          @submarine ||= Submarine.new(color: 0xaa_00ff00)
         when :patrol_boat
-          PatrolBoat.new
+          @patrol_boat ||= PatrolBoat.new(color: 0xaa_00ff00)
         else
           puts "Unknown ship: #{ship}"
+        end
+      end
+
+      def place_ship
+        return unless @ship
+
+        placed_ship_cells = @setup_grid.all { |c| c.data.instance_of?(@ship.class) }
+
+        if placed_ship_cells.size.positive?
+          # remove ship from grid
+          placed_ship_cells.each { |c| c.data = nil }
+        end
+
+        ship_grid_cells do |cells|
+          # Check number of cells and for existing ships
+          if cells.size != @ship.length || cells.find { |c| c.data != nil }
+            cells.each { |c| c.state = :error }
+          else # place ship
+            cells.each do |c|
+              c.data = @ship.dup
+            end
+            @ship = nil
+          end
+        end
+      end
+
+      def mouse_to_grid
+        CyberarmEngine::Vector.new(
+          ((window.mouse_x - (@setup_grid.x + @setup_grid.cell_size)) / @setup_grid.cell_size).floor,
+          ((window.mouse_y - (@setup_grid.y + @setup_grid.cell_size)) / @setup_grid.cell_size).floor
+        )
+      end
+
+      def ship_grid_cells(&block)
+        v = mouse_to_grid
+
+        if @ship && @setup_grid.get(v.x, v.y)
+          mid = @ship.length * 0.5
+          cells = []
+
+          case @ship.angle
+          when 0, 180 # Right, Left
+            @ship.length.times do |i|
+              c = @setup_grid.get((v.x - mid + i).ceil, v.y)
+              cells << c if c
+            end
+
+          when 90, -90 # Down, Up
+            @ship.length.times do |i|
+              c = @setup_grid.get(v.x, (v.y - mid + i).ceil)
+              cells << c if c
+            end
+          end
+
+          block.call(cells)
+        end
+      end
+
+      def valid_grid_setup?
+        list = [Battleship::AircraftCarrier, Battleship::BattleShip, Battleship::Cruiser, Battleship::Submarine, Battleship::PatrolBoat]
+        data = @setup_grid.cells.each.select { |c| c.data }.map { |c| c.data.class }
+
+        (list & data) == list
+      end
+
+      def button_down(id)
+        super
+
+        case id
+        when Gosu::MS_LEFT
+          place_ship
+        when Gosu::MS_RIGHT
+          if @ship
+            @ship = nil
+          else
+            # TODO: Delete ship
+          end
         end
       end
     end

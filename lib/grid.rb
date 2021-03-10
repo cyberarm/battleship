@@ -31,25 +31,51 @@ module Battleship
           @color = Gosu::Color.rgb(200, 0, 0)
         when :miss
           @color = Gosu::Color::WHITE
-        when :kill
+        when :kill, :error
           @color = Gosu::Color::RED
         else
           raise
         end
+
+        @state = sym
+      end
+
+      def state
+        @state
       end
     end
 
-    attr_reader :cell_size
+    attr_reader :cell_size, :x, :y
 
     def setup
       @parent = @options[:parent]
 
       @grid = Array.new(10) { Array.new(10) { Cell.new } }
       @cell_size = 16
+      @x = 0
+      @y = 0
     end
 
     def get(x, y)
+      return nil if x.negative? || y.negative?
+
       @grid.dig(y, x)
+    end
+
+    def find(&block)
+      @grid.flatten.find do |cell|
+        block.call(cell)
+      end
+    end
+
+    def all(&block)
+      @grid.flatten.select do |cell|
+        block.call(cell)
+      end
+    end
+
+    def cells
+      @grid.flatten
     end
 
     def mouse_over?(x, y)
@@ -73,13 +99,13 @@ module Battleship
       return unless @updated
 
       size = 11 * @cell_size
-      x = @parent.x
-      y = @parent.y
+      @x = @parent.x
+      @y = @parent.y
 
-      x = @parent.width / 2 + @parent.x - size / 2 if @parent.width > size
-      y = @parent.height / 2 + @parent.y - size / 2 if @parent.height > size
+      @x = @parent.width / 2 + @parent.x - size / 2 if @parent.width > size
+      @y = @parent.height / 2 + @parent.y - size / 2 if @parent.height > size
 
-      Gosu.translate(x, y) do
+      Gosu.translate(@x, @y) do
         Array("A".."J").each_with_index do |letter, i|
           FONT.draw_text(letter, @cell_size / 2 - FONT.text_width(letter) / 2, (@cell_size * i) + @cell_size + (@cell_size / 2 - FONT.height / 2), 10_000)
         end

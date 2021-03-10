@@ -14,12 +14,25 @@ module Battleship
 
       @position = options[:position]
       @position ||= CyberarmEngine::Vector.new
+
+      @color = options[:color]
+      @color ||= Gosu::Color::GREEN
+
+      @scale = 1.0
+    end
+
+    def width
+      image.width * @scale
+    end
+
+    def height
+      image.height * @scale
     end
 
     def draw(cell_size)
       Gosu.rotate(@angle, window.mouse_x, window.mouse_y) do
-        ratio = cell_size / 16.0
-        image.draw(@position.x, @position.y, 2, ratio, ratio, Gosu::Color::GREEN)
+        @scale = cell_size / 16.0
+        image.draw(@position.x, @position.y, 2, @scale, @scale, @color)
       end
     end
   end
