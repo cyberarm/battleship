@@ -19,3 +19,4 @@ require_relative "lib/command_proxy"
 require_relative "lib/player"
 
 Battleship::Window.new(width: 1280, height: 720).show
+# Battleship::Window.new(width: Gosu.screen_width, height: Gosu.screen_height, fullscreen: true).show
