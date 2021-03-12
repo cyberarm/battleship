@@ -59,7 +59,7 @@ module Battleship
     def handle_command
       command = @command_prompt.value.strip.upcase
 
-      if (valid = command.length.between?(2, 3))
+      if command.length.between?(2, 3)
         letter = command[0]
         number = command[1]
         number = command[1..2] if command.length == 3
@@ -77,10 +77,10 @@ module Battleship
             SFX::CMD_RECEIVED.play(1, 1, false)
           end
         else
-          SFX::HIT.play
+          SFX::ERROR.play
         end
       else
-        SFX::HIT.play
+        SFX::ERROR.play
       end
     end
   end

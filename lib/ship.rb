@@ -2,7 +2,7 @@ module Battleship
   class Ship
     include CyberarmEngine::Common
 
-    attr_accessor :angle, :position
+    attr_accessor :angle, :position, :grid_position
 
     def initialize(options = {})
       puts self.class
@@ -19,6 +19,8 @@ module Battleship
       @color ||= Gosu::Color::GREEN
 
       @scale = 1.0
+
+      @grid_position = nil
     end
 
     def width
@@ -30,7 +32,7 @@ module Battleship
     end
 
     def draw(cell_size)
-      Gosu.rotate(@angle, window.mouse_x, window.mouse_y) do
+      Gosu.rotate(@angle, @position.x + image.width / 2 * @scale, @position.y + image.height / 2 * @scale) do
         @scale = cell_size / 16.0
         image.draw(@position.x, @position.y, 2, @scale, @scale, @color)
       end

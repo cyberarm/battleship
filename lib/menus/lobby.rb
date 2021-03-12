@@ -10,7 +10,7 @@ module Battleship
               SFX::CLICK.play
               push_state(Menus::Loading, game_options: game_options)
             else
-              SFX::HIT.play
+              SFX::ERROR.play
             end
           end
 
@@ -223,7 +223,7 @@ module Battleship
 
       def valid_grid_setup?
         list = [Battleship::AircraftCarrier, Battleship::BattleShip, Battleship::Cruiser, Battleship::Submarine, Battleship::PatrolBoat]
-        data = @setup_grid.cells.each.select { |c| c.data }.map { |c| c.data.class }
+        data = @setup_grid.cells.each.select(&:data).map { |c| c.data.class }
 
         (list & data) == list
       end
