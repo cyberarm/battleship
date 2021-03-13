@@ -210,7 +210,7 @@ module Battleship
               cells << c if c
             end
 
-          when 90, -90 # Down, Up
+          when 90, 270 # Down, Up
             @ship.length.times do |i|
               c = @setup_grid.get(v.x, (v.y - mid + i).ceil)
               cells << c if c
