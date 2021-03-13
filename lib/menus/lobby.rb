@@ -31,8 +31,9 @@ module Battleship
               end
 
               para ""
-              check_box "Play Over Network?" do
-              end.subscribe(:changed) do |sender, value|
+              @network_game = check_box "Play Over Network?"
+
+              @network_game.subscribe(:changed) do |sender, value|
                 if value
                   @network_options.show
                 else
@@ -111,26 +112,26 @@ module Battleship
         @setup_grid.cells.each do |cell|
           if cell.data.is_a?(Ship)
             ship = cell.data
-            ship.draw(@setup_grid.cell_size)
+            ship.draw_in_grid(@setup_grid)
           end
         end
 
         @ship&.position = CyberarmEngine::Vector.new(window.mouse_x - @ship.width / 2, window.mouse_y - @ship.height / 2)
-        @ship&.draw(@setup_grid.cell_size)
+        @ship&.draw_detached(@setup_grid.cell_size)
       end
 
       def game_options
         {
           command_proxy: CommandProxy.new(
             players: [
-              Player.new(local: true, human: true),
-              Player.new(local: true, human: false)
+              Player.new(name: @player_name.value)
             ],
-            connection_type: :virtual,
+            connection_type: @network_game.value ? :socket : :virtual,
             hostname: @hostname.value,
             port: Integer(@port.value),
             hosting: @hosting.value
-          )
+          ),
+          player_board: @setup_grid
         }
       end
 
@@ -168,6 +169,7 @@ module Battleship
 
       def place_ship
         return unless @ship
+        return unless @setup_grid.mouse_over?(window.mouse_x, window.mouse_y)
 
         placed_ship_cells = @setup_grid.all { |c| c.data.instance_of?(@ship.class) }
 
@@ -181,9 +183,25 @@ module Battleship
           if cells.size != @ship.length || cells.find { |c| c.data != nil }
             cells.each { |c| c.state = :error }
           else # place ship
-            cells.each do |c|
-              c.data = @ship.dup
+            ship = @ship.dup
+            cell = cells.first
+
+            10.times do |y|
+              10.times do |x|
+                if cell == @setup_grid.get(x, y)
+                  ship.grid_position = CyberarmEngine::Vector.new(x, y)
+
+                  break
+                end
+              end
+
+              break if ship.grid_position
             end
+
+            cells.each do |c|
+              c.data = ship
+            end
+
             @ship = nil
           end
         end

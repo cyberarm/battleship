@@ -8,8 +8,15 @@ module Battleship
       @hosting = hosting
 
       @connected = false
+      @turn = 1
+    end
 
-      connect_to_peer!
+    def serve
+      # Start server
+    end
+
+    def current_turn
+      @turn
     end
 
     def connect_to_peer!

@@ -10,9 +10,9 @@ module Battleship
           background 0xff_102010
         end
 
-        @player_board = Grid.new(parent: player_board)
+        @player_board = @options[:player_board]
+        @player_board.parent = player_board
         @game_objects << @player_board
-
 
         # Players attack board and command prompt
         stack(width: 0.5, height: 1.0) do
@@ -29,6 +29,19 @@ module Battleship
 
             @command_prompt = edit_line "", width: 1.0
           end
+        end
+      end
+    end
+
+    def draw
+      super
+
+      Gosu.flush
+
+      @player_board.cells.each do |cell|
+        if cell.data.is_a?(Ship)
+          ship = cell.data
+          ship.draw_in_grid(@player_board)
         end
       end
     end
@@ -57,6 +70,7 @@ module Battleship
     end
 
     def handle_command
+      return unless @game_proxy.current_turn
       command = @command_prompt.value.strip.upcase
 
       if command.length.between?(2, 3)

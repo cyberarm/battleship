@@ -45,6 +45,7 @@ module Battleship
       end
     end
 
+    attr_accessor :parent
     attr_reader :cell_size, :x, :y
 
     def setup

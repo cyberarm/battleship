@@ -1,6 +1,10 @@
 module Battleship
   class Player
-    def initialize(local:, human:)
+    attr_reader :name, :data
+
+    def initialize(name:)
+      @name = name
+      @data = {}
     end
   end
 end

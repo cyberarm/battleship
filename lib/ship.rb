@@ -31,7 +31,34 @@ module Battleship
       image.height * @scale
     end
 
-    def draw(cell_size)
+    def draw_in_grid(grid)
+      return unless @grid_position
+
+      @position.x = grid.x + ((@grid_position.x + 1) * grid.cell_size)
+      @position.y = grid.y + ((@grid_position.y + 1) * grid.cell_size)
+
+      case @angle
+      when 90
+        @position.x += grid.cell_size
+
+        draw_without_rotation_midpoint_offset(grid)
+      when 270
+        @position.y += image.width * @scale
+
+        draw_without_rotation_midpoint_offset(grid)
+      else
+        draw_detached(grid.cell_size)
+      end
+    end
+
+    def draw_without_rotation_midpoint_offset(grid)
+      Gosu.rotate(@angle, @position.x, @position.y) do
+        @scale = grid.cell_size / 16.0
+        image.draw(@position.x, @position.y, 2, @scale, @scale, @color)
+      end
+    end
+
+    def draw_detached(cell_size)
       Gosu.rotate(@angle, @position.x + image.width / 2 * @scale, @position.y + image.height / 2 * @scale) do
         @scale = cell_size / 16.0
         image.draw(@position.x, @position.y, 2, @scale, @scale, @color)
